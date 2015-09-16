@@ -43,12 +43,14 @@ public class SelectUserDialog extends DialogWrapper {
     init();
     setTitle(title);
 
-    myLogin.getDocument().addDocumentListener(new DocumentAdapter() {
-      @Override
-      protected void textChanged(DocumentEvent e) {
-        setOKActionEnabled(myLogin.getSelectedUser() != null);
-      }
-    });
+    if (myLogin != null) {
+      myLogin.getDocument().addDocumentListener(new DocumentAdapter() {
+        @Override
+        protected void textChanged(DocumentEvent e) {
+          setOKActionEnabled(myLogin.getSelectedUser() != null);
+        }
+      });
+    }
     setOKButtonText(GctBundle.message("select.user.continue"));
     setCancelButtonText(GctBundle.message("select.user.manuallogin"));
     setOKActionEnabled(false);
