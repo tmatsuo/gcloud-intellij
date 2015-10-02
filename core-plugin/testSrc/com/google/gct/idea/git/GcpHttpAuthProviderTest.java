@@ -16,6 +16,7 @@
 
 package com.google.gct.idea.git;
 
+import com.google.gct.idea.elysium.SelectUserDialog;
 import com.google.gct.login.CredentialedUser;
 import com.google.gct.login.GoogleLogin;
 import com.google.gct.login.MockGoogleLogin;
@@ -23,7 +24,6 @@ import com.google.gdt.eclipse.login.common.GoogleLoginState;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.testFramework.LightIdeaTestCase;
 import com.intellij.util.AuthData;
-import git4idea.DialogManager;
 import org.mockito.Mockito;
 
 import java.util.LinkedHashMap;
@@ -31,7 +31,7 @@ import java.util.LinkedHashMap;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link com.google.gct.idea.git.GcpHttpAuthDataProvider}
+ * Tests for {@link com.google.gct.idea.git.GcpHttpAuthDataProvider}.
  */
 public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   public static final String GOOGLE_URL = "https://source.developers.google.com";
@@ -39,14 +39,15 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   private static final String PASSWORD = "123";
   private static final String CACHE_KEY = "com.google.gct.idea.git.username";
 
-  private DialogManager myDialogManager = Mockito.mock(DialogManager.class);
- // private TestDialogManager myDialogManager;
+//  private DialogManager myDialogManager = Mockito.mock(DialogManager.class);
+  private TestDialogManager myDialogManager;
   private MockGoogleLogin myGoogleLogin;
   private boolean myDialogShown;
 
   @Override
   protected final void setUp() throws Exception {
     super.setUp();
+    myDialogManager = new TestDialogManager(); //(TestDialogManager) ServiceManager.getService(DialogManager.class);
 
     myGoogleLogin = new MockGoogleLogin();
     myGoogleLogin.install();
@@ -66,8 +67,6 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
 
     myDialogShown = false;
 
-
-    /*
     myDialogManager.registerDialogHandler(SelectUserDialog.class, new TestDialogHandler<SelectUserDialog>() {
       @Override
       public int handleDialog(SelectUserDialog dialog) {
@@ -75,7 +74,7 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
         myDialogShown = true;
         return 0;
       }
-    }); */
+    });
   }
 
   @Override
@@ -83,7 +82,7 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     myGoogleLogin.cleanup();
     PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
     GcpHttpAuthDataProvider.setCurrentProject(null);
-    // myDialogManager.cleanup();
+    myDialogManager.cleanup();
     super.tearDown();
   }
 
