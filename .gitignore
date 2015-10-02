@@ -1,6 +1,9 @@
 /out
 .idea/workspace.xml
+.idea/libraries/Gradle*
 .gradle/
+common-lib/.gradle/
+common-lib/build/
 core-plugin/.gradle/
 core-plugin/build/
 google-login-plugin/.gradle/
@@ -9,5 +12,3 @@ google-login-plugin/build/
 idea-IC/
 .idea/gradle.xml
 .idea/codeStyleSettings.xml
-.idea/libraries/*
-
