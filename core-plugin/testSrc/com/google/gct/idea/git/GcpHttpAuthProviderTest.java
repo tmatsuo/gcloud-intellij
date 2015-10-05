@@ -22,8 +22,10 @@ import com.google.gct.login.GoogleLogin;
 import com.google.gct.login.MockGoogleLogin;
 import com.google.gdt.eclipse.login.common.GoogleLoginState;
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.testFramework.LightIdeaTestCase;
 import com.intellij.util.AuthData;
+import git4idea.DialogManager;
 import org.mockito.Mockito;
 
 import java.util.LinkedHashMap;
@@ -47,7 +49,8 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   @Override
   protected final void setUp() throws Exception {
     super.setUp();
-    myDialogManager = new TestDialogManager(); //(TestDialogManager) ServiceManager.getService(DialogManager.class);
+
+    myDialogManager = (TestDialogManager) ServiceManager.getService(DialogManager.class);
 
     myGoogleLogin = new MockGoogleLogin();
     myGoogleLogin.install();
