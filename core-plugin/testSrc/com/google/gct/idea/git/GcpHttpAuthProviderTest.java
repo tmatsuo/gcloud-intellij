@@ -22,6 +22,8 @@ import com.google.gct.login.GoogleLogin;
 import com.google.gct.login.MockGoogleLogin;
 import com.google.gdt.eclipse.login.common.GoogleLoginState;
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.mock.MockComponentManager;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.testFramework.LightIdeaTestCase;
 import com.intellij.util.AuthData;
@@ -41,7 +43,6 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   private static final String PASSWORD = "123";
   private static final String CACHE_KEY = "com.google.gct.idea.git.username";
 
-//  private DialogManager myDialogManager = Mockito.mock(DialogManager.class);
   private TestDialogManager myDialogManager;
   private MockGoogleLogin myGoogleLogin;
   private boolean myDialogShown;
@@ -50,6 +51,9 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   protected final void setUp() throws Exception {
     super.setUp();
 
+    Disposable disposable = new SimpleDisposable();
+    MockComponentManager componentManager = new MockComponentManager(null, disposable);
+    componentManager.registerService(DialogManager.class, TestDialogManager.class);
     myDialogManager = (TestDialogManager) ServiceManager.getService(DialogManager.class);
 
     myGoogleLogin = new MockGoogleLogin();
@@ -128,5 +132,11 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     assertEquals(USER, result.getLogin());
     assertEquals(PASSWORD, result.getPassword());
     assertEquals(USER, PropertiesComponent.getInstance(ourProject).getValue(CACHE_KEY));
+  }
+
+  private static class SimpleDisposable implements Disposable {
+    @Override
+    public void dispose() {
+    }
   }
 }
