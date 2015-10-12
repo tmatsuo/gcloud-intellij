@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.gct.idea.debugger;
+package com.google.gct.idea;
+
+import com.google.gct.idea.debugger.CloudDebugConfigType;
+import com.google.gct.idea.feedback.FeedbackUtil;
 
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.openapi.components.ApplicationComponent;
@@ -23,9 +26,12 @@ import com.intellij.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Conditionally registers our {@link CloudDebugRunConfiguration} if our flag is on.
+ * Performs runtime initialization for the GCT plugin.
  */
-public class DebuggerInitializationComponent implements ApplicationComponent {
+public class PluginInitializationComponent implements ApplicationComponent {
+
+  private static final String PLUGIN_ID = "com.google.gct.core";
+
   @Override
   public void disposeComponent() {
 
@@ -34,7 +40,7 @@ public class DebuggerInitializationComponent implements ApplicationComponent {
   @NotNull
   @Override
   public String getComponentName() {
-    return "DebuggerInitializationComponent";
+    return "GoogleCloudToolsCore.InitializationComponent";
   }
 
   @Override
@@ -44,6 +50,7 @@ public class DebuggerInitializationComponent implements ApplicationComponent {
         enableCloudDebugger();
       }
     } else {
+      FeedbackUtil.enableGoogleFeedbackErrorReporting(PLUGIN_ID);
       enableCloudDebugger();
     }
   }
