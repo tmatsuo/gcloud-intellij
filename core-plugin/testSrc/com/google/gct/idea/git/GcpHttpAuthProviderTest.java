@@ -22,13 +22,14 @@ import com.google.gct.login.GoogleLogin;
 import com.google.gct.login.MockGoogleLogin;
 import com.google.gdt.eclipse.login.common.GoogleLoginState;
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.mock.MockComponentManager;
+import com.intellij.mock.MockProject;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.testFramework.LightIdeaTestCase;
 import com.intellij.util.AuthData;
 import git4idea.DialogManager;
 import org.mockito.Mockito;
+import org.picocontainer.defaults.DefaultPicoContainer;
 
 import java.util.LinkedHashMap;
 
@@ -46,14 +47,19 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   private TestDialogManager myDialogManager;
   private MockGoogleLogin myGoogleLogin;
   private boolean myDialogShown;
+  private MockProject myProject;
+
 
   @Override
   protected final void setUp() throws Exception {
     super.setUp();
 
     Disposable disposable = new SimpleDisposable();
-    MockComponentManager componentManager = new MockComponentManager(null, disposable);
-    componentManager.registerService(DialogManager.class, TestDialogManager.class);
+    myProject = new MockProject(new DefaultPicoContainer(), disposable);
+
+    /*MockComponentManager componentManager = (MockComponentManager) ourProject; //= new MockComponentManager(null, disposable);
+    componentManager.registerService(DialogManager.class, TestDialogManager.class);*/
+    myProject.registerService(DialogManager.class, TestDialogManager.class);
     myDialogManager = (TestDialogManager) ServiceManager.getService(DialogManager.class);
 
     myGoogleLogin = new MockGoogleLogin();
@@ -69,8 +75,10 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     when(GoogleLogin.getInstance().getAllUsers()).thenReturn(allUsers);
     allUsers.put(USER, user);
 
-    PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
-    GcpHttpAuthDataProvider.setCurrentProject(ourProject);
+    PropertiesComponent.getInstance(myProject).unsetValue(CACHE_KEY);
+    //PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
+    //GcpHttpAuthDataProvider.setCurrentProject(ourProject);
+    GcpHttpAuthDataProvider.setCurrentProject(myProject);
 
     myDialogShown = false;
 
@@ -87,7 +95,8 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   @Override
   protected final void tearDown() throws Exception {
     myGoogleLogin.cleanup();
-    PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
+    PropertiesComponent.getInstance(myProject).unsetValue(CACHE_KEY);
+//    PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
     GcpHttpAuthDataProvider.setCurrentProject(null);
     myDialogManager.cleanup();
     super.tearDown();
@@ -107,7 +116,7 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     assertTrue(myDialogShown);
     assertEquals(USER, result.getLogin());
     assertEquals(PASSWORD, result.getPassword());
-    assertEquals(USER, PropertiesComponent.getInstance(ourProject).getValue(CACHE_KEY));
+    assertEquals(USER, PropertiesComponent.getInstance(myProject).getValue(CACHE_KEY));
   }
 
   public void testForCachedState() {
