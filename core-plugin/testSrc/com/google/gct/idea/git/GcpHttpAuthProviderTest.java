@@ -24,12 +24,13 @@ import com.google.gdt.eclipse.login.common.GoogleLoginState;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.mock.MockProject;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.testFramework.LightIdeaTestCase;
 import com.intellij.util.AuthData;
 import git4idea.DialogManager;
 import org.mockito.Mockito;
-import org.picocontainer.defaults.DefaultPicoContainer;
+import org.picocontainer.MutablePicoContainer;
 
 import java.util.LinkedHashMap;
 
@@ -49,17 +50,15 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   private boolean myDialogShown;
   private MockProject myProject;
 
-
   @Override
   protected final void setUp() throws Exception {
     super.setUp();
 
-    Disposable disposable = new SimpleDisposable();
-    myProject = new MockProject(new DefaultPicoContainer(), disposable);
+    MutablePicoContainer container = (MutablePicoContainer) ApplicationManager.getApplication().getPicoContainer();
+    container.unregisterComponent(DialogManager.class.getName());
+    container.registerComponentImplementation(DialogManager.class.getName(), TestDialogManager.class);
+    myProject = new MockProject(container, Mockito.mock(Disposable.class));
 
-    /*MockComponentManager componentManager = (MockComponentManager) ourProject; //= new MockComponentManager(null, disposable);
-    componentManager.registerService(DialogManager.class, TestDialogManager.class);*/
-    myProject.registerService(DialogManager.class, TestDialogManager.class);
     myDialogManager = (TestDialogManager) ServiceManager.getService(DialogManager.class);
 
     myGoogleLogin = new MockGoogleLogin();
@@ -76,8 +75,6 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     allUsers.put(USER, user);
 
     PropertiesComponent.getInstance(myProject).unsetValue(CACHE_KEY);
-    //PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
-    //GcpHttpAuthDataProvider.setCurrentProject(ourProject);
     GcpHttpAuthDataProvider.setCurrentProject(myProject);
 
     myDialogShown = false;
@@ -96,7 +93,6 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   protected final void tearDown() throws Exception {
     myGoogleLogin.cleanup();
     PropertiesComponent.getInstance(myProject).unsetValue(CACHE_KEY);
-//    PropertiesComponent.getInstance(ourProject).unsetValue(CACHE_KEY);
     GcpHttpAuthDataProvider.setCurrentProject(null);
     myDialogManager.cleanup();
     super.tearDown();
@@ -120,19 +116,19 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
   }
 
   public void testForCachedState() {
-    PropertiesComponent.getInstance(ourProject).setValue(CACHE_KEY, USER);
+    PropertiesComponent.getInstance(myProject).setValue(CACHE_KEY, USER);
 
     GcpHttpAuthDataProvider authDataProvider = new GcpHttpAuthDataProvider();
     AuthData result = authDataProvider.getAuthData(GOOGLE_URL);
 
-    assertTrue(!myDialogShown);
+    assertFalse(myDialogShown);
     assertEquals(USER, result.getLogin());
     assertEquals(PASSWORD, result.getPassword());
-    assertEquals(USER, PropertiesComponent.getInstance(ourProject).getValue(CACHE_KEY));
+    assertEquals(USER, PropertiesComponent.getInstance(myProject).getValue(CACHE_KEY));
   }
 
   public void testForInvalidCachedState() {
-    PropertiesComponent.getInstance(ourProject).setValue(CACHE_KEY, "invalidusername");
+    PropertiesComponent.getInstance(myProject).setValue(CACHE_KEY, "invalidusername");
 
     GcpHttpAuthDataProvider authDataProvider = new GcpHttpAuthDataProvider();
     AuthData result = authDataProvider.getAuthData(GOOGLE_URL);
@@ -140,12 +136,7 @@ public class GcpHttpAuthProviderTest extends LightIdeaTestCase {
     assertTrue(myDialogShown);
     assertEquals(USER, result.getLogin());
     assertEquals(PASSWORD, result.getPassword());
-    assertEquals(USER, PropertiesComponent.getInstance(ourProject).getValue(CACHE_KEY));
+    assertEquals(USER, PropertiesComponent.getInstance(myProject).getValue(CACHE_KEY));
   }
 
-  private static class SimpleDisposable implements Disposable {
-    @Override
-    public void dispose() {
-    }
-  }
 }
