@@ -18,6 +18,10 @@
   <name>Google Account</name>
   <version>${pluginVersionPlaceholder}</version>
   <vendor>Google</vendor>
+
+  <!--Make the plugin not available in any recent IDEA build.  This is a way to keep the IJ
+    plugin repo aware of our plugin and give us a plugin ID for alpha channel deployments without
+    actually having the plugin available in the GA channel.-->
   <idea-version since-build="4000" until-build="4001"/>
 
   <description>

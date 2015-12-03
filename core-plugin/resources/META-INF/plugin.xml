@@ -6,6 +6,11 @@ Code inspections for AppEngine Java code.</description>
   <vendor>Google</vendor>
   <id>com.google.gct.core</id>
 
+  <!--Make the plugin not available in any recent IDEA build.  This is a way to keep the IJ
+    plugin repo aware of our plugin and give us a plugin ID for alpha channel deployments without
+    actually having the plugin available in the GA channel.-->
+  <idea-version since-build="4000" until-build="4001"/>
+
   <!-- "idea-version since-build" is set by the gradle intellij plugin -->
 
   <depends>com.intellij.modules.platform</depends>
