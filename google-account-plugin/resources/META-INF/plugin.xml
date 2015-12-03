@@ -18,6 +18,7 @@
   <name>Google Account</name>
   <version>${pluginVersionPlaceholder}</version>
   <vendor>Google</vendor>
+  <idea-version since-build="4000" until-build="4001"/>
 
   <description>
     Provides Google account setting and authentication for IntelliJ plugins that need it.

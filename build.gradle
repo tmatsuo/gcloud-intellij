@@ -30,6 +30,7 @@ subprojects {
         version = ideaVersion
         downloadSources = true
         sandboxDirectory = "${rootProject.buildDir}/idea-sandbox"
+        updateSinceUntilBuild = false
     }
 
     configurations.all {
