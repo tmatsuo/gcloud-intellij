@@ -16,7 +16,6 @@
 <idea-plugin version="2">
   <id>com.google.gct.login</id>
   <name>Google Account</name>
-  <version>${pluginVersionPlaceholder}</version>
   <vendor>Google</vendor>
 
   <description>
