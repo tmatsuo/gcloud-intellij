@@ -18,13 +18,14 @@ package com.google.gct.idea.debugger;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.services.clouddebugger.model.Breakpoint;
 import com.google.gct.idea.debugger.CloudDebugProcessStateController.ResolveBreakpointHandler;
+import com.google.gct.idea.debugger.actions.CloudDebugHelpAction;
 import com.google.gct.idea.debugger.ui.CloudDebugHistoricalSnapshots;
-import com.google.gct.idea.debugger.ui.ExitDialog;
 import com.google.gct.idea.ui.GoogleCloudToolsIcons;
 import com.google.gct.idea.util.GctBundle;
 import com.google.gct.idea.util.GctTracking;
 import com.google.gct.stats.UsageTrackerProvider;
 
+import com.intellij.debugger.actions.DebuggerActions;
 import com.intellij.debugger.ui.DebuggerContentInfo;
 import com.intellij.debugger.ui.breakpoints.BreakpointManager;
 import com.intellij.execution.ExecutionBundle;
@@ -80,7 +81,7 @@ import javax.swing.SwingUtilities;
  * <p/>
  * CloudDebugProcess only exists for the duration of the IDE debug session.
  * <p/>
- * It also contains within it state {@link CloudDebugProcessState} which can live beyond the lifetime of the debug
+ * It also contains state {@link CloudDebugProcessState} that can live beyond the lifetime of the debug
  * session and be serialized into workspace.xml state.
  */
 public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointListener {
@@ -178,6 +179,7 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
    * However, multiple successive calls to this method may return a different list. Therefore, callers must store the
    * return value locally to operate on it and should not call this method repeatedly expecting the same list.
    */
+  // todo: can we declare this as ImmutableList?
   public List<Breakpoint> getCurrentBreakpointList() {
     return getProcessState().getCurrentServerBreakpointList();
   }
@@ -262,12 +264,15 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
             SwingUtilities.invokeLater(new Runnable() {
               @Override
               public void run() {
-                //We will only do the selection if the id for this async task matches the latest
+                // We will only do the selection if the id for this async task matches the latest
                 // user clicked item.  This prevents multiple (and possibly out of order) selections
                 // getting queued up.
                 if (id.equals(myNavigatedSnapshotId)) {
                   if (result.getIsFinalState() != Boolean.TRUE || result.getStackFrames() == null) {
                     getBreakpointHandler().navigateTo(result);
+                    if (result.getStackFrames() == null) {
+                      navigateToBreakpoint(result);
+                    }
                     return;
                   }
 
@@ -365,6 +370,26 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
       }
     }
 
+    // remove help button since it points to the IntelliJ help by default and we don't have
+    // a help page yet.
+    // for some reason, the help button's key in leftToolbar is null, so we need to remove it
+    // by class name.
+    // https://github.com/GoogleCloudPlatform/gcloud-intellij/issues/149
+    for (AnAction child : leftToolbar.getChildActionsOrStubs()) {
+      if (child.getClass().getCanonicalName().equalsIgnoreCase(
+          "com.intellij.ide.actions.ContextHelpAction")) {
+        // we never want to show IDEA's help.
+        leftToolbar.remove(child);
+
+        // show our help if we have it.
+        String helpUrl = GctBundle.getString("clouddebug.helpurl");
+        if (!"".equals(helpUrl)) {
+          leftToolbar.add(new CloudDebugHelpAction(helpUrl));
+        }
+        break;
+      }
+    }
+
     leftToolbar.remove(manager.getAction(XDebuggerActions.RESUME));
     leftToolbar.remove(manager.getAction(XDebuggerActions.PAUSE));
     leftToolbar.remove(manager.getAction(XDebuggerActions.MUTE_BREAKPOINTS));
@@ -375,6 +400,7 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
     topToolbar.remove(manager.getAction(XDebuggerActions.STEP_OUT));
     topToolbar.remove(manager.getAction(XDebuggerActions.RUN_TO_CURSOR));
     topToolbar.remove(manager.getAction(XDebuggerActions.EVALUATE_EXPRESSION));
+    topToolbar.remove(manager.getAction(DebuggerActions.POP_FRAME));
   }
 
   public void removeListener(@NotNull CloudBreakpointListener listener) {
@@ -407,7 +433,7 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
 
     RunProfile profile = getXDebugSession().getRunProfile();
     if (profile instanceof CloudDebugRunConfiguration) {
-      ((CloudDebugRunConfiguration)profile).setProcessState(myProcessState);
+      ((CloudDebugRunConfiguration) profile).setProcessState(myProcessState);
     }
 
     getRepositoryValidator().restoreToOriginalState(getXDebugSession().getProject());
@@ -474,8 +500,22 @@ public class CloudDebugProcess extends XDebugProcess implements CloudBreakpointL
 
     @Override
     public void actionPerformed(AnActionEvent event) {
-      ExitDialog exitDialog = new ExitDialog(getXDebugSession().getProject());
-      exitDialog.showAndGetOk();
+      int result = Messages.showOkCancelDialog(event.getProject(),
+          GctBundle.getString("clouddebug.continue.listening"),
+          GctBundle.getString("clouddebug.message.title"),
+          GctBundle.getString("clouddebug.continue"),
+          GctBundle.getString("clouddebug.stop.listening"),
+          Messages.getQuestionIcon());
+      if (result == Messages.OK) { // continue
+        myProcessState.setListenInBackground(true);
+        UsageTrackerProvider.getInstance().trackEvent(
+            GctTracking.CATEGORY, GctTracking.CLOUD_DEBUGGER, "close.continue.listening", null);
+      }
+      else {
+        myProcessState.setListenInBackground(false);
+        UsageTrackerProvider.getInstance().trackEvent(
+            GctTracking.CATEGORY, GctTracking.CLOUD_DEBUGGER, "close.stop.listening", null);
+      }
       ActionManager.getInstance().getAction(IdeActions.ACTION_STOP_PROGRAM).actionPerformed(event);
       ActionManager.getInstance().getAction(IdeActions.ACTION_CLOSE).actionPerformed(event);
       UsageTrackerProvider.getInstance()

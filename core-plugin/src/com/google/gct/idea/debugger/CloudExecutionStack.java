@@ -28,22 +28,29 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * CloudExecutionStack represents an entire stack for a {@link com.google.api.services.debugger .model.Breakpoint} It
+ * CloudExecutionStack represents an entire stack for a {@link com.google.api.services.debugger.model.BreakPoint} It
  * stores the individual frames, and also the variables and custom watch expressions.
  */
 public class CloudExecutionStack extends XExecutionStack {
-  private final List<XStackFrame> myFrames = new ArrayList<XStackFrame>();
+  private final List<CloudStackFrame> myFrames = new ArrayList<CloudStackFrame>();
 
   public CloudExecutionStack(@NotNull Project project,
                              @NotNull String name,
-                             @NotNull List<StackFrame> frames,
-                             @NotNull List<Variable> variableTable,
+                             @Nullable List<StackFrame> frames,
+                             @Nullable List<Variable> variableTable,
                              @Nullable List<Variable> evaluatedExpressions) {
     super(name);
-    for (StackFrame nativeFrame : frames) {
-      myFrames.add(new CloudStackFrame(project, nativeFrame, variableTable, evaluatedExpressions));
-      // We only show custom watches on the top frame.
-      evaluatedExpressions = null;
+
+    if (frames != null) {
+      if (variableTable == null) {
+        variableTable = Collections.emptyList();
+      }
+      for (StackFrame nativeFrame : frames) {
+        myFrames
+            .add(new CloudStackFrame(project, nativeFrame, variableTable, evaluatedExpressions));
+          // We only show custom watches on the top frame.
+          evaluatedExpressions = null;
+      }
     }
   }
 
@@ -53,12 +60,12 @@ public class CloudExecutionStack extends XExecutionStack {
       container.addStackFrames(myFrames.subList(firstFrameIndex, myFrames.size()), true);
     }
     else {
-      container.addStackFrames(Collections.<XStackFrame>emptyList(), true);
+      container.addStackFrames(Collections.<CloudStackFrame>emptyList(), true);
     }
   }
 
   @Override
-  public XStackFrame getTopFrame() {
+  public CloudStackFrame getTopFrame() {
     return myFrames.size() > 0 ? myFrames.get(0) : null;
   }
 }

@@ -1,6 +1,7 @@
 package com.google.gct.idea.debugger;
 
 import com.google.api.client.util.Lists;
+import com.intellij.debugger.actions.DebuggerActions;
 import com.intellij.debugger.ui.DebuggerContentInfo;
 import com.intellij.execution.ui.RunnerLayoutUi;
 import com.intellij.execution.ui.layout.LayoutStateDefaults;
@@ -59,10 +60,12 @@ public class CloudDebugProcessTest extends PlatformTestCase {
         AnAction action1 = manager.getAction(IdeActions.ACTION_CLOSE);
         action1.getTemplatePresentation().setText("Close");
         AnAction action2 = manager.getAction(IdeActions.ACTION_CONTEXT_HELP);
+        AnAction action3 = manager.getAction(IdeActions.ACTION_CALL_HIERARCHY);
         List<AnAction> leftToolbarActions = Lists.newArrayList();
         leftToolbarActions.add(action0);
         leftToolbarActions.add(action1);
         leftToolbarActions.add(action2);
+        leftToolbarActions.add(action3);
         DefaultActionGroup leftToolbar = new DefaultActionGroup(leftToolbarActions);
         List actions = Lists.newArrayList();
         DefaultActionGroup topToolbar = new DefaultActionGroup(actions);
@@ -72,7 +75,7 @@ public class CloudDebugProcessTest extends PlatformTestCase {
 
         assertEquals(3, leftToolbar.getChildrenCount());
         assertEquals(action0, leftToolbar.getChildActionsOrStubs()[0]);
-        assertEquals(action2, leftToolbar.getChildActionsOrStubs()[1]);
+        assertEquals(action3, leftToolbar.getChildActionsOrStubs()[1]);
     }
 
     @Test
@@ -128,6 +131,12 @@ public class CloudDebugProcessTest extends PlatformTestCase {
     @Test
     public void testRegisterAdditionalActions_evaluate() {
         assertRemoveFromTopToolbar(XDebuggerActions.EVALUATE_EXPRESSION);
+    }
+
+    @Test
+    public void testRegisterAdditionalActions_dropFrame() {
+        // name of constant "POP_FRAME" and UI label "Drop Frame" are inconsistent
+        assertRemoveFromTopToolbar(DebuggerActions.POP_FRAME);
     }
 
     private void assertRemoveFromLeftToolbar(String actionId) {
