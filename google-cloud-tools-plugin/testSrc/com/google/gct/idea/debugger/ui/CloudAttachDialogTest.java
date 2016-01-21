@@ -15,20 +15,24 @@
  */
 package com.google.gct.idea.debugger.ui;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.clouddebugger.model.Debuggee;
+import com.google.gct.idea.debugger.CloudDebugProcessState;
+import com.google.gct.idea.debugger.ProjectRepositoryValidator;
+import com.google.gct.idea.debugger.SyncResult;
 import com.google.gct.idea.elysium.ProjectSelector;
 import com.google.gct.login.CredentialedUser;
 import com.google.gct.login.GoogleLogin;
 import com.google.gct.login.MockGoogleLogin;
 import com.google.gdt.eclipse.login.common.GoogleLoginState;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.testFramework.PlatformTestCase;
-
-import org.mockito.Mockito;
 
 import java.util.LinkedHashMap;
 
@@ -47,6 +51,7 @@ public class CloudAttachDialogTest extends PlatformTestCase {
 
   private ProjectSelector projectSelector;
   private CloudAttachDialog dialog;
+  private ProjectDebuggeeBinding binding;
   private JComboBox moduleSelector;
   private JLabel warningHeader;
   private JLabel warningMessage;
@@ -55,15 +60,10 @@ public class CloudAttachDialogTest extends PlatformTestCase {
   public void setUp() throws Exception {
     super.setUp();
     mockCredentials();
-
-    dialog = new CloudAttachDialog(this.getProject());
-    projectSelector = dialog.getElysiumProjectSelector();
-    moduleSelector = dialog.getDebuggeeTarget();
-    warningHeader = dialog.getWarningHeader();
-    warningMessage = dialog.getWarningMessage();
   }
 
   public void testErrorWhenUserIsLoggedOut() {
+    initDialog();
     mockLoggedOutUser();
     ValidationInfo error = dialog.doValidate();
 
@@ -71,7 +71,8 @@ public class CloudAttachDialogTest extends PlatformTestCase {
     assertEquals(NO_LOGIN_WARNING, error.message);
   }
 
-  public void testErrorWhenNoProjectSelected() {
+  public void testNoProjectSelected() {
+    initDialog();
     mockLoggedInUser();
     ValidationInfo error = getValidationError();
 
@@ -80,37 +81,75 @@ public class CloudAttachDialogTest extends PlatformTestCase {
   }
 
   public void testNoModulesFound() {
+    initDialog();
     mockLoggedInUser();
     selectEmptyProject();
     ValidationInfo error = getValidationError();
 
-    // Errors
     assertNotNull(error);
     assertEquals(SELECT_VALID_PROJECT_WARNING, error.message);
-
-    // Warnings
     assertFalse(warningMessage.isVisible());
     assertFalse(warningHeader.isVisible());
 
-    // Module selector
     assertFalse(moduleSelector.isEnabled());
   }
 
   public void testDebuggableModuleSelected() {
     mockLoggedInUser();
+
+    binding = mock(ProjectDebuggeeBinding.class);
+    when(binding.buildResult(any(Project.class))).thenReturn(new CloudDebugProcessState());
+
+    ProjectRepositoryValidator repositoryValidator = mock(ProjectRepositoryValidator.class);
+    SyncResult syncResult = mockDebuggableSyncResult();
+    when(repositoryValidator.checkSyncStashState()).thenReturn(syncResult);
+
+    initDialog();
+    dialog.setProjectRepositoryValidator(repositoryValidator);
+
     selectProjectWithDebuggableModules();
     ValidationInfo error = getValidationError();
 
-    // Errors
     assertNull(error);
 
-    // TODO: complete these once CloudAttachDialog is further refactored for testability
-    // Warnings
-//    assertFalse(warningMessage.isVisible());
-//    assertFalse(warningHeader.isVisible());
+    assertFalse(warningMessage.isVisible());
+    assertFalse(warningHeader.isVisible());
 
-    // Module selector
-//    assertTrue(moduleSelector.isEnabled());
+    assertTrue(moduleSelector.isEnabled());
+  }
+
+  /**
+   * If an unidentified project is chosen, there should be a default module selected
+   * in a disabled state with warning text
+   *
+   * Related to Issue #309 - if there is no module loaded (including no default module)
+   * then this indicates that the async module loading is still in progress. We do not
+   * want to display a warning to the user until the module loading is complete to avoid
+   * the flashing warning message as described by this issue.
+   */
+  public void testUnknownProjectSelected() {
+    initDialog();
+    mockLoggedInUser();
+    selectUnknownProject();
+
+    ValidationInfo error = getValidationError();
+
+    assertNotNull(error);
+
+    assertFalse(moduleSelector.isEnabled());
+
+
+    // TODO this currently fails, partially confirming issue #309
+    // uncomment once bug is fixed
+//    assertEquals(SELECT_VALID_PROJECT_WARNING, moduleSelector.getSelectedItem());
+  }
+
+  private void initDialog() {
+    dialog = new CloudAttachDialog(this.getProject(), binding);
+    projectSelector = dialog.getElysiumProjectSelector();
+    moduleSelector = dialog.getDebuggeeTarget();
+    warningHeader = dialog.getWarningHeader();
+    warningMessage = dialog.getWarningMessage();
   }
 
   @SuppressWarnings("unchecked")
@@ -134,13 +173,18 @@ public class CloudAttachDialogTest extends PlatformTestCase {
     return dialog.doValidate();
   }
 
+  private void selectUnknownProject() {
+    String projectName = "unknownProject";
+    projectSelector.setText(projectName);
+  }
+
   private void mockCredentials() throws Exception {
     MockGoogleLogin googleLogin = new MockGoogleLogin();
     googleLogin.install();
 
-    GoogleLoginState googleLoginState = Mockito.mock(GoogleLoginState.class);
-    Credential credential = Mockito.mock(Credential.class);
-    this.user = Mockito.mock(CredentialedUser.class);
+    GoogleLoginState googleLoginState = mock(GoogleLoginState.class);
+    Credential credential = mock(Credential.class);
+    this.user = mock(CredentialedUser.class);
     LinkedHashMap<String, CredentialedUser> allusers = new LinkedHashMap<String, CredentialedUser>();
 
     when(this.user.getCredential()).thenReturn(credential);
@@ -157,6 +201,20 @@ public class CloudAttachDialogTest extends PlatformTestCase {
 
   private void mockLoggedInUser() {
     when(GoogleLogin.getInstance().isLoggedIn()).thenReturn(true);
+  }
+
+  /**
+   * Creates a mock sync result representing a debuggable module selection
+   * that doesn't need stash or sync
+   */
+  private SyncResult mockDebuggableSyncResult() {
+    SyncResult syncResult = mock(SyncResult.class);
+    when(syncResult.needsStash()).thenReturn(false);
+    when(syncResult.needsSync()).thenReturn(false);
+    when(syncResult.getTargetSyncSHA()).thenReturn(null);
+    when(syncResult.hasRemoteRepository()).thenReturn(true);
+
+    return syncResult;
   }
 
   @Override

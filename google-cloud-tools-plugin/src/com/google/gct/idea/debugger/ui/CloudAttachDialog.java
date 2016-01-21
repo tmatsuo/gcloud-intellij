@@ -74,6 +74,7 @@ public class CloudAttachDialog extends DialogWrapper {
 
   private final Project project;
   private final ProjectDebuggeeBinding wireup;
+  private ProjectRepositoryValidator projectRepositoryValidator;
   private JComboBox debuggeeTarget; // Module selector
   private ProjectSelector elysiumProjectSelector; // Project combo box
   private JBLabel infoMessage;
@@ -87,7 +88,7 @@ public class CloudAttachDialog extends DialogWrapper {
   private JBLabel warningHeader;
   private JBLabel warningMessage;
 
-  public CloudAttachDialog(@NotNull Project project) {
+  public CloudAttachDialog(@NotNull Project project, @VisibleForTesting ProjectDebuggeeBinding wireup) {
     super(project, true);
 
     this.project = project;
@@ -137,7 +138,7 @@ public class CloudAttachDialog extends DialogWrapper {
     }
     BasicAction.saveAll();
 
-    wireup = new ProjectDebuggeeBinding(elysiumProjectSelector, debuggeeTarget);
+    this.wireup = wireup == null ? new ProjectDebuggeeBinding(elysiumProjectSelector, debuggeeTarget) : wireup;
     debuggeeTarget.setEnabled(false);
     debuggeeTarget.addActionListener(new ActionListener() {
       @Override
@@ -191,12 +192,12 @@ public class CloudAttachDialog extends DialogWrapper {
           elysiumProjectSelector);
     }
 
-    if (!debuggeeTarget.isEnabled()) {
+    if (!debuggeeTarget.isEnabled() && debuggeeTarget.getItemCount() > 0) {
       return new ValidationInfo(GctBundle.getString("clouddebug.selectvalidproject"),
           elysiumProjectSelector);
     }
 
-    if (debuggeeTarget.getSelectedItem() == null) {
+    if (debuggeeTarget.getSelectedItem() == null && debuggeeTarget.getItemCount() > 0) {
       return new ValidationInfo(GctBundle.getString("clouddebug.selectvalidproject"),
           debuggeeTarget);
     }
@@ -233,6 +234,11 @@ public class CloudAttachDialog extends DialogWrapper {
     return warningMessage;
   }
 
+  @VisibleForTesting
+  void setProjectRepositoryValidator(ProjectRepositoryValidator projectRepositoryValidator) {
+    this.projectRepositoryValidator = projectRepositoryValidator;
+  }
+
   private void buildResult() {
     processResultState = wireup.buildResult(project);
     ProjectRepositoryState repositoryState = ProjectRepositoryState.fromProcessState(
@@ -250,7 +256,10 @@ public class CloudAttachDialog extends DialogWrapper {
       LOG.error("unexpected result state during a check sync stash state");
       return;
     }
-    syncResult = new ProjectRepositoryValidator(processResultState).checkSyncStashState();
+
+    syncResult = projectRepositoryValidator == null ?
+        new ProjectRepositoryValidator(processResultState).checkSyncStashState() :
+        projectRepositoryValidator.checkSyncStashState();
 
     if (syncResult.needsStash() && syncResult.needsSync()) {
       setOKButtonText(isContinued()

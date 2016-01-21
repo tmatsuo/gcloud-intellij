@@ -148,8 +148,7 @@ class ProjectDebuggeeBinding {
                 DebugTarget targetSelection = null;
 
                 if (debuggees == null || debuggees.getDebuggees() == null || debuggees.getDebuggees().isEmpty()) {
-                  myDebugeeTarget.setEnabled(false);
-                  myDebugeeTarget.addItem(GctBundle.getString("clouddebug.nomodulesfound"));
+                  disableModuleSelector();
                 }
                 else {
                   myDebugeeTarget.setEnabled(true);
@@ -186,10 +185,19 @@ class ProjectDebuggeeBinding {
               }
             });
           }
+          else {
+            disableModuleSelector();
+          }
         } catch (IOException ex) {
+          disableModuleSelector();
           LOG.error("Error listing debuggees from Cloud Debugger API", ex);
         }
       }
     });
+  }
+
+  private void disableModuleSelector() {
+    myDebugeeTarget.setEnabled(false);
+    myDebugeeTarget.addItem(GctBundle.getString("clouddebug.selectvalidproject"));
   }
 }
