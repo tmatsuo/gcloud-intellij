@@ -28,6 +28,7 @@ import java.io.IOException;
 public class CloudDebugGlobalPollerTest extends BasePluginTestCase {
 
   private static final String FAKE_USER_EMAIL = "foo@example.com";
+  private static final String FAKE_DEBUGGEE_ID = "debuggee-id-123456789";
 
   private CloudDebugProcessState cloudDebugProcessState;
   private CloudDebugGlobalPoller cloudDebugGlobalPoller;
@@ -54,6 +55,7 @@ public class CloudDebugGlobalPollerTest extends BasePluginTestCase {
   public void testPollForChangesFiresNotificationOnIOException() throws IOException {
     cloudDebugProcessState.setListenInBackground(true);
     cloudDebugProcessState.setUserEmail(FAKE_USER_EMAIL);
+    cloudDebugProcessState.setDebuggeeId(FAKE_DEBUGGEE_ID);
 
     setupCloudDebuggerBackendMockWithException(FAKE_USER_EMAIL, new IOException());
 
