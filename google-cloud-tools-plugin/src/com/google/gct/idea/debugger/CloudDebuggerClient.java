@@ -46,8 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CloudDebuggerClient {
 
-  private static final int LONG_CONNECTION_TIMEOUT_MS = 120 * 1000;
-  private static final int SHORT_CONNECTION_TIMEOUT_MS = 10 * 1000;
+  static final int LONG_CONNECTION_TIMEOUT_MS = 120 * 1000;
+  static final int SHORT_CONNECTION_TIMEOUT_MS = 10 * 1000;
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final Logger LOG = Logger.getInstance(CloudDebuggerClient.class);
