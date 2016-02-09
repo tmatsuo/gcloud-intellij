@@ -63,7 +63,7 @@ From inside IDEA:
 
 9. Click Restart (or you can click Postpone, but the plugins will not be available until you do restart IDEA.)
 
- ![](images/restartintellij.png)
+  <img style="max-width: 100%; height: auto;" src="images/restartintellij.png">
 
 ## Setting up the app
 
@@ -143,7 +143,7 @@ It is built with Maven version 3.1 or later.
 
 11. Visit the application at http://*projectname*.appspot.com/hellobrowser using Chrome. You'll see it say:
  
-  ![](images/HelloBrowser.png)
+  <img style="max-width: 100%; height: auto;" src="images/HelloBrowser.png">
  
  Aha! That's a bug. It's supposed to say "Hello Chrome" when you visit in Chrome.
  If you like, try it in Safari or Opera. In fact, it almost always says "Hello Firefox."
@@ -159,11 +159,11 @@ It is built with Maven version 3.1 or later.
    In the "Welcome to IntelliJ IDEA" window, pick "Import Project" and choose the pom.xml
    file.
    
-  ![](images/choosepom.png)
+  <img style="max-width: 100%; height: auto;" src="images/choosepom.png">
    
 2. If not already checked, check the box for "Import Maven projects automatically."
 
-  ![](images/importproject.png)
+  <img style="max-width: 100%; height: auto;" src="images/importproject.png">
   
   From this point the default options in the rest of the wizard should be fine,
   though you may need to set up a Java 1.7 SDK if you have not already done so.
@@ -171,21 +171,21 @@ It is built with Maven version 3.1 or later.
 3. Once IntelliJ has loaded the project, pull down the Run menu 
    and select Edit Configurations... (Run > Edit Configurations...)
    
-     ![](images/rundebugconfigurations.png)
+     <img style="max-width: 100%; height: auto;" src="images/rundebugconfigurations.png">
 
 4. Click the + icon on the upper left hand side. Select "Cloud Debug" from the popup menu. 
 
-     ![](images/clouddebugconfiguration.png)
+     <img style="max-width: 100%; height: auto;" src="images/clouddebugconfiguration.png">
 
   (If this option doesn't appear, check whether the plugin is installed and activated.)
 
 5. Set the name of the configuration to "My First Debugging Session."
 
-     ![](images/entersessionname.png)
+     <img style="max-width: 100%; height: auto;" src="images/entersessionname.png">
 
 6. At the right-hand side of the Project popup, click the little arrow. You'll see a sign in pane.
 
-  ![](images/MyFirstDebuggingSession.png)
+  <img style="max-width: 100%; height: auto;" src="images/MyFirstDebuggingSession.png">
 
 7. Click the "Sign In" button.
 
@@ -198,7 +198,7 @@ account that can manage the application.
 
 10. You are now asked to grant a list of permissions to IDEA. After waiting a few seconds for the button to activate, click "Allow".
 
-  ![](images/permissions.png)
+  <img style="max-width: 100%; height: auto;" src="images/permissions.png">
 
  (Yes, the list of permissions requested is overly long. 
  The Cloud Debugger doesn't actually need or use all of them.
@@ -206,12 +206,12 @@ account that can manage the application.
 
 11. You will see a window saying "IntelliJ is now authorized to access your account." Close the browser window and return to IntelliJ.
 
-  ![](images/IntelliJIsNowAuthorized.png)
+  <img style="max-width: 100%; height: auto;" src="images/IntelliJIsNowAuthorized.png">
 
 
 12. At the right-hand side of the Project popup, click the little arrow again. This time you'll see a list of applications managed by your account. Select the one you just created.
 
-  ![](images/devconsoleprojects.png)
+  <img style="max-width: 100%; height: auto;" src="images/devconsoleprojects.png">
 
 
 13. Click the OK button.
@@ -221,7 +221,7 @@ account that can manage the application.
 15. Select the module in the dialog that pops up. 
 You may have to wait a few seconds for this to populate.
 
-  ![](images/attachtoanapplication.png)
+  <img style="max-width: 100%; height: auto;" src="images/attachtoanapplication.png">
 
 The Debug pane will open, usually at the bottom of the window.
 
@@ -241,7 +241,7 @@ Here set a snapshot location at the line.
 
         if (userAgent != null) {
             
-  ![](images/snapshotlocation.png)
+  <img style="max-width: 100%; height: auto;" src="images/snapshotlocation.png">
 
 The little blue circle that appears in the gutter when you click represents the snapshot location.
 When you mouse over it, a tooltip will show you exactly where it's set.
@@ -268,20 +268,20 @@ Don't worry. It's not especially important.)
 Return to IDEA and you should see that the snapshot in the lower lefthand panel
 is no longer pending:
 
-  ![](images/receivedsnapshot.png)
+  <img style="max-width: 100%; height: auto;" src="images/receivedsnapshot.png">
 
 Click it. The bottom middle frame loads the stack trace and
 the bottom right hand frame loads local variables and method arguments 
 in scope at that point in the code and their values at that point in time. 
 Fields are also available by expanding the "this" variable.
 
-  ![](images/expandedsnapshot.png)
+  <img style="max-width: 100%; height: auto;" src="images/expandedsnapshot.png">
 
 Inspect the `userAgent` variable in the right hand frame. You 
 can either make the frame wider or use the context menu and select
 "Inspect..."
 
-  ![](images/inspectvariable.png)
+  <img style="max-width: 100%; height: auto;" src="images/inspectvariable.png">
 
 Now you see that userAgent is "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36". 
 
@@ -308,7 +308,7 @@ Now that you see what's going on, let's fix it.
 
 3. Visit the web page again.
 
-  ![](images/hellosafari.png)
+  <img style="max-width: 100%; height: auto;" src="images/hellosafari.png">
 
 Surprise! It's another bug. 
 Try using the Cloud Debugger to find it. 
@@ -358,7 +358,7 @@ though not completely eliminated, when running on Managed VMs or GCE.
 When you're finished debugging, click the red square in the upper left corner 
 of the debug pane. IntelliJ asks whether to continue listening for snapshots in the background:
 
-![](images/continuelistening.png)
+<img style="max-width: 100%; height: auto;" src="images/continuelistening.png">
 
 
 If you continue listening, then additional snapshots will be delivered to
@@ -377,7 +377,7 @@ You can only define one condition per snapshot location.
 To set a condition, right click on the blue circle indicating the snapshot location
 and fill in a boolean expression that is valid at that line.
 
-![](images/conditionalsnapshotlocation.png)
+<img style="max-width: 100%; height: auto;" src="images/conditionalsnapshotlocation.png">
 
 
 #### Watch Expressions
@@ -402,7 +402,7 @@ You can specify a watch expression after you have set the snapshot location. To 
 
 4. Type the expression you want evaluated and hit return.
 
-![](images/watchexpressions.png)
+<img style="max-width: 100%; height: auto;" src="images/watchexpressions.png">
 
 
 
