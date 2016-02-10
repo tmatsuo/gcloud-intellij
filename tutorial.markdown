@@ -38,8 +38,6 @@ In order to follow along with this tutorial, you need the following software ins
 
 ## Installing the Plugins
 
-*<span style="color:red">Note: these instructions don't work yet. They will soon. Meanwhile you'll need to follow [these instructions](https://github.com/GoogleCloudPlatform/gcloud-intellij/blob/master/README.md#installation).</span>* 
-
 The plugin can be installed from the 
 [IntelliJ IDEA Plugin Repository](https://www.jetbrains.com/idea/plugins/).
 
