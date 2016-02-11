@@ -1,4 +1,5 @@
 ---
+layout: default
 title: IntelliJ IDEA Google Cloud Debugger Tutorial
 ---
 

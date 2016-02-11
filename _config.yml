@@ -1,0 +1,14 @@
+# Site settings
+title: Google Cloud Tools for IntelliJ
+email: 
+description: > # this means to ignore newlines until "baseurl:"
+  This Google-sponsored open source project is developing plugins to support 
+  Google Cloud Platform development inside JetBrains' IDEA integrated 
+  development environment.
+baseurl: "/gcloud-intellij" # the subpath of your site, e.g. /blog
+url: "http://googlecloudplatform.github.io"
+twitter_username: 
+github_username:  
+
+# Build settings
+markdown: kramdown
