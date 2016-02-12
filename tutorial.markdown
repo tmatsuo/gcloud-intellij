@@ -324,7 +324,7 @@ For example, imagine that you knew the servlet was sending incorrect data but yo
 know the problem was triggered by a particular browser. This is normally accomplished with
 a conditional snapshot location.
 
-####Some notes:
+#### Some notes:
 
 Since you can't single step through an application in the Cloud Debugger,
 it's more common to put the snapshot location at the end of the relevant block
