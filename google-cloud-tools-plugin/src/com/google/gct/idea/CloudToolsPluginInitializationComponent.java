@@ -15,11 +15,13 @@
  */
 package com.google.gct.idea;
 
+import com.google.gct.idea.appengine.cloud.ManagedVmCloudType;
 import com.google.gct.idea.debugger.CloudDebugConfigType;
 
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.remoteServer.ServerType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +51,9 @@ public class CloudToolsPluginInitializationComponent implements ApplicationCompo
       pluginConfigurationService
           .registerExtension(
               ConfigurationType.CONFIGURATION_TYPE_EP, new CloudDebugConfigType());
+    }
+    if (pluginInfoService.shouldEnable(GctFeature.MANAGEDVM)) {
+      pluginConfigurationService.registerExtension(ServerType.EP_NAME, new ManagedVmCloudType());
     }
     if (pluginInfoService.shouldEnableErrorFeedbackReporting()) {
       pluginConfigurationService
