@@ -22,6 +22,7 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.remoteServer.ServerType;
+import com.intellij.remoteServer.impl.configuration.deployment.DeployToServerConfigurationType;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +54,10 @@ public class CloudToolsPluginInitializationComponent implements ApplicationCompo
               ConfigurationType.CONFIGURATION_TYPE_EP, new CloudDebugConfigType());
     }
     if (pluginInfoService.shouldEnable(GctFeature.MANAGEDVM)) {
-      pluginConfigurationService.registerExtension(ServerType.EP_NAME, new ManagedVmCloudType());
+      ManagedVmCloudType managedVmCloudType = new ManagedVmCloudType();
+      pluginConfigurationService.registerExtension(ServerType.EP_NAME, managedVmCloudType);
+      pluginConfigurationService.registerExtension(ConfigurationType.CONFIGURATION_TYPE_EP,
+          new DeployToServerConfigurationType(managedVmCloudType));
     }
     if (pluginInfoService.shouldEnableErrorFeedbackReporting()) {
       pluginConfigurationService
