@@ -44,7 +44,7 @@ The plugin can be installed from the
 
 From inside IDEA:
 
-1. File > Settings
+1. File > Settings (On Mac OS X, IntelliJ IDEA > Preferences... ) 
 
 2. In the left-hand pane, select Plugins.
 
