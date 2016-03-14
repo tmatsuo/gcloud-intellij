@@ -91,7 +91,7 @@ public class ManagedVmCloudType extends ServerType<ManagedVmServerConfiguration>
 
   @NotNull
   @Override
-  public DeploymentConfigurator<?, ManagedVmServerConfiguration> createDeploymentConfigurator(
+  public DeploymentConfigurator<ManagedVmDeploymentConfiguration, ManagedVmServerConfiguration> createDeploymentConfigurator(
       Project project) {
     return new ManagedVmDeploymentConfigurator(project);
   }

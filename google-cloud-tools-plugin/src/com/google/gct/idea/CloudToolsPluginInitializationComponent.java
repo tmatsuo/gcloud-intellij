@@ -15,14 +15,16 @@
  */
 package com.google.gct.idea;
 
+import com.google.gct.idea.appengine.cloud.DeployToManagedVmConfigurationType;
 import com.google.gct.idea.appengine.cloud.ManagedVmCloudType;
+import com.google.gct.idea.appengine.cloud.ManagedVmRunConfigurationExtension;
 import com.google.gct.idea.debugger.CloudDebugConfigType;
 
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.remoteServer.ServerType;
-import com.intellij.remoteServer.impl.configuration.deployment.DeployToServerConfigurationType;
+import com.intellij.remoteServer.impl.configuration.deployment.DeployToServerRunConfigurationExtension;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -56,8 +58,13 @@ public class CloudToolsPluginInitializationComponent implements ApplicationCompo
     if (pluginInfoService.shouldEnable(GctFeature.MANAGEDVM)) {
       ManagedVmCloudType managedVmCloudType = new ManagedVmCloudType();
       pluginConfigurationService.registerExtension(ServerType.EP_NAME, managedVmCloudType);
+
       pluginConfigurationService.registerExtension(ConfigurationType.CONFIGURATION_TYPE_EP,
-          new DeployToServerConfigurationType(managedVmCloudType));
+          new DeployToManagedVmConfigurationType(managedVmCloudType));
+
+      ManagedVmRunConfigurationExtension managedVmRunConfigurationExtension = new ManagedVmRunConfigurationExtension();
+        pluginConfigurationService.registerExtension(DeployToServerRunConfigurationExtension.EP_NAME,
+            managedVmRunConfigurationExtension);
     }
     if (pluginInfoService.shouldEnableErrorFeedbackReporting()) {
       pluginConfigurationService
