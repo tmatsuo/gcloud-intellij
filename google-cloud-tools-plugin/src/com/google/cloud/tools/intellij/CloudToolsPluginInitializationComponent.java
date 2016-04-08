@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.google.cloud.tools.intellij;
 
 import com.google.cloud.tools.intellij.appengine.cloud.AppEngineCloudType;
@@ -20,8 +21,13 @@ import com.google.cloud.tools.intellij.appengine.cloud.AppEngineCloudType.UserSp
 import com.google.cloud.tools.intellij.debugger.CloudDebugConfigType;
 
 import com.intellij.execution.configurations.ConfigurationType;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionStub;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.extensions.Extensions;
 import com.intellij.remoteServer.ServerType;
 import com.intellij.remoteServer.configuration.deployment.DeploymentSourceType;
 import com.intellij.remoteServer.impl.configuration.deployment.DeployToServerConfigurationType;
@@ -56,6 +62,8 @@ public class CloudToolsPluginInitializationComponent implements ApplicationCompo
               ConfigurationType.CONFIGURATION_TYPE_EP, new CloudDebugConfigType());
     }
     if (pluginInfoService.shouldEnable(GctFeature.APPENGINE_FLEX)) {
+      unregisterIJAppEngineDeployment();
+
       AppEngineCloudType appEngineCloudType = new AppEngineCloudType();
       pluginConfigurationService.registerExtension(ServerType.EP_NAME, appEngineCloudType);
       pluginConfigurationService.registerExtension(DeploymentSourceType.EP_NAME,
@@ -66,6 +74,46 @@ public class CloudToolsPluginInitializationComponent implements ApplicationCompo
     if (pluginInfoService.shouldEnableErrorFeedbackReporting()) {
       pluginConfigurationService
           .enabledGoogleFeedbackErrorReporting(pluginInfoService.getPluginId());
+    }
+
+  }
+
+  private void unregisterIJAppEngineDeployment() {
+
+    ActionManager actionManager = ActionManager.getInstance();
+    AnAction uploadAppEngineAppAction = actionManager.getAction("AppEngine.UploadApplication");
+    if (uploadAppEngineAppAction != null) {
+      DefaultActionGroup toolsMenu = (DefaultActionGroup) actionManager.getAction("ToolsMenu");
+      for (AnAction anAction : toolsMenu.getChildActionsOrStubs()) {
+        if (anAction instanceof ActionStub) {
+          ActionStub action = (ActionStub) anAction;
+          if (action.getId().equals("AppEngine.UploadApplication")) {
+            toolsMenu.remove(anAction);
+          }
+        }
+      }
+      actionManager.unregisterAction("AppEngine.UploadApplication");
+    }
+
+    ServerType[] extensions = Extensions.getRootArea().getExtensionPoint(ServerType.EP_NAME)
+        .getExtensions();
+    for (ServerType extension : extensions) {
+      if (extension.getId().equals("google-app-engine")) {
+        ConfigurationType[] configurations = Extensions.getRootArea()
+            .getExtensionPoint(ConfigurationType.CONFIGURATION_TYPE_EP)
+            .getExtensions();
+        for (ConfigurationType configuration : configurations) {
+          if (configuration instanceof DeployToServerConfigurationType) {
+            if (((DeployToServerConfigurationType) configuration).getServerType()
+                .equals(extension)) {
+              Extensions.getRootArea().getExtensionPoint(ConfigurationType.CONFIGURATION_TYPE_EP)
+                  .unregisterExtension(configuration);
+            }
+          }
+        }
+        Extensions.getRootArea().getExtensionPoint(ServerType.EP_NAME)
+            .unregisterExtension(extension);
+      }
     }
   }
 }
