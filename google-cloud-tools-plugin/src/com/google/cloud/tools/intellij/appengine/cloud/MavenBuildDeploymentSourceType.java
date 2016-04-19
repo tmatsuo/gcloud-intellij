@@ -26,6 +26,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
@@ -33,8 +34,6 @@ import org.jetbrains.idea.maven.tasks.MavenBeforeRunTasksProvider;
 
 import java.util.Collection;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * A Maven build deployment source type providing an auto configured pre-deploy build step

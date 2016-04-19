@@ -18,6 +18,7 @@ package com.google.cloud.tools.intellij.appengine.cloud;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.service.project.manage.ProjectDataManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModulePointer;
 import com.intellij.openapi.project.Project;
 import com.intellij.remoteServer.configuration.deployment.DeploymentSourceType;
@@ -85,8 +86,7 @@ public class GradleBuildDeploymentSource extends ModuleDeploymentSourceImpl {
       return null;
     }
 
-    ExternalProject moduleExternalProject =
-        dataService.findExternalProject(rootExternalProject, getModule());
+    ExternalProject moduleExternalProject = getGradleProjectForModule(project, getModule());
 
     if (moduleExternalProject == null) {
       return null;
@@ -111,6 +111,27 @@ public class GradleBuildDeploymentSource extends ModuleDeploymentSourceImpl {
     });
 
     return buildFiles.length > 0 ? buildFiles[0] : null;
+  }
+
+  @Nullable
+  protected static ExternalProject getGradleProjectForModule(Project project, Module module) {
+    ExternalProjectDataService dataService =
+        (ExternalProjectDataService) ServiceManager.getService(
+            ProjectDataManager.class).getDataService(ExternalProjectDataService.KEY);
+
+    if (dataService == null || project.getBasePath() == null || module == null) {
+      return null;
+    }
+
+    ExternalProject rootExternalProject =
+        dataService.getRootExternalProject(GradleConstants.SYSTEM_ID,
+            new File(project.getBasePath()));
+
+    if (rootExternalProject == null) {
+      return null;
+    }
+
+    return dataService.findExternalProject(rootExternalProject, module);
   }
 
 }

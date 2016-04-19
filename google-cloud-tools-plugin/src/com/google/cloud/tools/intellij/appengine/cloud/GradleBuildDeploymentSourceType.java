@@ -29,14 +29,13 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.execution.GradleBeforeRunTaskProvider;
+import org.jetbrains.plugins.gradle.model.ExternalProject;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * A Gradle build deployment source type providing an auto configured pre-deploy build step
@@ -60,10 +59,15 @@ public class GradleBuildDeploymentSourceType extends BuildDeploymentSourceType {
         new ExternalSystemBeforeRunTask(
             GradleBeforeRunTaskProvider.ID, GradleConstants.SYSTEM_ID);
 
-    ExternalSystemTaskExecutionSettings taskSettings = task.getTaskExecutionSettings();
-    taskSettings.setExternalProjectPath(getPathToGradleBuildFile(module));
-    taskSettings.setTaskNames(ImmutableList.of(GRADLE_TASK_BUILD));
-    task.setEnabled(true);
+    ExternalProject moduleExternalProject =
+        GradleBuildDeploymentSource.getGradleProjectForModule(project, module);
+
+    if(moduleExternalProject != null && moduleExternalProject.getBuildFile() != null) {
+      ExternalSystemTaskExecutionSettings taskSettings = task.getTaskExecutionSettings();
+      taskSettings.setExternalProjectPath(moduleExternalProject.getBuildFile().getParent());
+      taskSettings.setTaskNames(ImmutableList.of(GRADLE_TASK_BUILD));
+      task.setEnabled(true);
+    }
 
     return task;
   }
@@ -79,9 +83,5 @@ public class GradleBuildDeploymentSourceType extends BuildDeploymentSourceType {
             .getTaskNames().contains(GRADLE_TASK_BUILD);
       }
     }).isEmpty();
-  }
-
-  private String getPathToGradleBuildFile(Module module) {
-    return new File(module.getModuleFilePath()).getParent();
   }
 }

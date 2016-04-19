@@ -92,7 +92,7 @@ class AppEngineDeploymentConfigurator extends
   }
 
   private List<Artifact> getJarsAndWars() {
-    List<Artifact> jarsAndWars = new ArrayList<Artifact>();
+    List<Artifact> jarsAndWars = new ArrayList<>();
     for (Artifact artifact : ArtifactManager.getInstance(project).getArtifacts()) {
       if (artifact.getArtifactType().getId().equalsIgnoreCase("jar")
           || artifact.getArtifactType().getId().equalsIgnoreCase("war")) {

@@ -29,11 +29,11 @@ import com.intellij.remoteServer.impl.configuration.deployment.DeployToServerRun
 import com.intellij.remoteServer.impl.configuration.deployment.ModuleDeploymentSourceType;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.swing.JComponent;
 
 /**
