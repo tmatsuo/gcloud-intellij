@@ -26,11 +26,13 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.remoteServer.configuration.deployment.DeploymentSource;
 import com.intellij.remoteServer.runtime.deployment.DeploymentLogManager;
 import com.intellij.remoteServer.runtime.deployment.DeploymentTask;
 import com.intellij.remoteServer.runtime.deployment.ServerRuntimeInstance;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.HashSet;
@@ -70,8 +72,11 @@ class AppEngineRuntimeInstance extends
 
     final AppEngineDeployAction deployAction;
     AppEngineDeploymentConfiguration deploymentConfig = task.getConfiguration();
-    File deploymentSource = deploymentConfig.isUserSpecifiedArtifact() ?
-        new File(deploymentConfig.getUserSpecifiedArtifactPath()) : task.getSource().getFile();
+    File deploymentSource = resolveDeploymentSource(task);
+    if (deploymentSource == null) {
+      callback.errorOccurred(GctBundle.message("appengine.deployment.source.not.found.error"));
+      return;
+    }
 
     if (deploymentConfig.getConfigType() == ConfigType.AUTO) {
       deployAction = appEngineHelper.createAutoDeploymentAction(
@@ -121,6 +126,14 @@ class AppEngineRuntimeInstance extends
       }
       createdDeployments.clear();
     }
+  }
+
+  @Nullable
+  private File resolveDeploymentSource(DeploymentTask<AppEngineDeploymentConfiguration> task) {
+    DeploymentSource source = task.getSource();
+
+    return task.getConfiguration().isUserSpecifiedArtifact() ?
+        new File(task.getConfiguration().getUserSpecifiedArtifactPath()) : source.getFile();
   }
 
   @NotNull

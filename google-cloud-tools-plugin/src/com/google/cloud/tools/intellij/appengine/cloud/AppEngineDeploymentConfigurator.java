@@ -18,6 +18,9 @@ package com.google.cloud.tools.intellij.appengine.cloud;
 
 import com.google.cloud.tools.intellij.appengine.util.CloudSdkUtil;
 
+import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModulePointer;
 import com.intellij.openapi.module.ModulePointerManager;
 import com.intellij.openapi.options.SettingsEditor;
@@ -31,6 +34,8 @@ import com.intellij.remoteServer.configuration.deployment.JavaDeploymentSourceUt
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.idea.maven.project.MavenProjectsManager;
+import org.jetbrains.plugins.gradle.util.GradleConstants;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,7 +57,20 @@ class AppEngineDeploymentConfigurator extends
   @NotNull
   @Override
   public List<DeploymentSource> getAvailableDeploymentSources() {
-    List<DeploymentSource> deploymentSources = new ArrayList<DeploymentSource>();
+    List<DeploymentSource> deploymentSources = new ArrayList<>();
+
+    for (Module module : ModuleManager.getInstance(project).getModules()) {
+      if (isMavenBuild(module)) {
+        deploymentSources.add(
+            new MavenBuildDeploymentSource(
+                ModulePointerManager.getInstance(project).create(module), project));
+      }
+      if (isGradleBuild(module)) {
+        deploymentSources.add(
+            new GradleBuildDeploymentSource(
+                ModulePointerManager.getInstance(project).create(module), project));
+      }
+    }
 
     ModulePointer modulePointer =
         ModulePointerManager.getInstance(project).create("userSpecifiedSource");
@@ -62,6 +80,15 @@ class AppEngineDeploymentConfigurator extends
         .getInstance().createArtifactDeploymentSources(project, getJarsAndWars()));
 
     return deploymentSources;
+  }
+
+  private boolean isMavenBuild(Module module) {
+    return MavenProjectsManager.getInstance(project).isMavenizedModule(module)
+        && MavenProjectsManager.getInstance(project).findProject(module) != null;
+  }
+
+  private boolean isGradleBuild(Module module) {
+    return ExternalSystemApiUtil.isExternalSystemAwareModule(GradleConstants.SYSTEM_ID, module);
   }
 
   private List<Artifact> getJarsAndWars() {
