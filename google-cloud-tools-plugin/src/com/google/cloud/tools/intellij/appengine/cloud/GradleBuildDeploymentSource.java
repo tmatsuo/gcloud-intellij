@@ -99,9 +99,6 @@ public class GradleBuildDeploymentSource extends ModuleDeploymentSourceImpl {
    * Uses a best-effort approach to locate the Gradle build artifact.
    * Assumes the build artifact is located in the /libs folder under the root build directory.
    * Also assumes only a single build artifact. Will only return one artifact if multiple are found.
-   *
-   * @param buildDir
-   * @return
    */
   @Nullable
   private File findGradleBuildArtifact(@NotNull File buildDir) {
