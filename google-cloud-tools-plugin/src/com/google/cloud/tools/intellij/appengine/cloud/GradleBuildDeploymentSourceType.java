@@ -26,7 +26,6 @@ import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings;
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemBeforeRunTask;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,17 +53,16 @@ public class GradleBuildDeploymentSourceType extends BuildDeploymentSourceType {
 
   @Nullable
   @Override
-  protected BeforeRunTask createBuildTask(Project project, Module module) {
+  protected BeforeRunTask createBuildTask(Module module) {
     ExternalSystemBeforeRunTask task =
         new ExternalSystemBeforeRunTask(
             GradleBeforeRunTaskProvider.ID, GradleConstants.SYSTEM_ID);
 
-    ExternalProject moduleExternalProject =
-        GradleBuildDeploymentSource.getGradleProjectForModule(project, module);
+    String gradleModulePath = getGradleModulePath(module);
 
-    if(moduleExternalProject != null && moduleExternalProject.getBuildFile() != null) {
+    if(gradleModulePath != null) {
       ExternalSystemTaskExecutionSettings taskSettings = task.getTaskExecutionSettings();
-      taskSettings.setExternalProjectPath(moduleExternalProject.getBuildFile().getParent());
+      taskSettings.setExternalProjectPath(gradleModulePath);
       taskSettings.setTaskNames(ImmutableList.of(GRADLE_TASK_BUILD));
       task.setEnabled(true);
     }
@@ -73,15 +71,31 @@ public class GradleBuildDeploymentSourceType extends BuildDeploymentSourceType {
   }
 
   @Override
-  protected boolean hasBuildTask(Collection<? extends BeforeRunTask> beforeRunTasks) {
+  protected boolean hasBuildTaskForModule(
+      Collection<? extends BeforeRunTask> beforeRunTasks, final Module module) {
     return !Collections2.filter(beforeRunTasks, new Predicate<BeforeRunTask>() {
       @Override
       public boolean apply(@Nullable BeforeRunTask beforeRunTask) {
         return beforeRunTask != null
             && beforeRunTask instanceof ExternalSystemBeforeRunTask
             && ((ExternalSystemBeforeRunTask) beforeRunTask).getTaskExecutionSettings()
-            .getTaskNames().contains(GRADLE_TASK_BUILD);
+            .getTaskNames().contains(GRADLE_TASK_BUILD)
+            && ((ExternalSystemBeforeRunTask) beforeRunTask)
+            .getTaskExecutionSettings().getExternalProjectPath()
+            .equals(getGradleModulePath(module));
       }
     }).isEmpty();
+  }
+
+  @Nullable
+  private String getGradleModulePath(Module module) {
+    ExternalProject gradleProject =
+        GradleBuildDeploymentSource.getGradleProjectForModule(module);
+
+    if(gradleProject == null) {
+      return null;
+    }
+
+    return gradleProject.getBuildDir().getParent();
   }
 }

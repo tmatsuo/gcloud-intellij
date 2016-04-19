@@ -86,7 +86,7 @@ public class GradleBuildDeploymentSource extends ModuleDeploymentSourceImpl {
       return null;
     }
 
-    ExternalProject moduleExternalProject = getGradleProjectForModule(project, getModule());
+    ExternalProject moduleExternalProject = getGradleProjectForModule(getModule());
 
     if (moduleExternalProject == null) {
       return null;
@@ -114,18 +114,18 @@ public class GradleBuildDeploymentSource extends ModuleDeploymentSourceImpl {
   }
 
   @Nullable
-  protected static ExternalProject getGradleProjectForModule(Project project, Module module) {
+  protected static ExternalProject getGradleProjectForModule(Module module) {
     ExternalProjectDataService dataService =
         (ExternalProjectDataService) ServiceManager.getService(
             ProjectDataManager.class).getDataService(ExternalProjectDataService.KEY);
 
-    if (dataService == null || project.getBasePath() == null || module == null) {
+    if (dataService == null || module.getProject().getBasePath() == null || module == null) {
       return null;
     }
 
     ExternalProject rootExternalProject =
         dataService.getRootExternalProject(GradleConstants.SYSTEM_ID,
-            new File(project.getBasePath()));
+            new File(module.getProject().getBasePath()));
 
     if (rootExternalProject == null) {
       return null;

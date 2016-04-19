@@ -23,7 +23,6 @@ import com.intellij.execution.BeforeRunTask;
 import com.intellij.execution.RunManagerEx;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.Project;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,34 +51,45 @@ public class MavenBuildDeploymentSourceType extends BuildDeploymentSourceType {
 
   @Nullable
   @Override
-  protected BeforeRunTask createBuildTask(Project project, Module module) {
-    MavenProject mavenProject =
-        MavenProjectsManager.getInstance(project).findProject(module);
-
-    if(mavenProject == null) {
-      return null;
-    }
-
+  protected BeforeRunTask createBuildTask(Module module) {
     MavenBeforeRunTask task = new MavenBeforeRunTask();
 
-    task.setProjectPath(mavenProject.getFile().getPath());
-    task.setGoal(MAVEN_TASK_INSTALL);
-    task.setEnabled(true);
+    String mavenModulePath = getMavenModulePath(module);
+
+    if(mavenModulePath != null) {
+      task.setProjectPath(mavenModulePath);
+      task.setGoal(MAVEN_TASK_INSTALL);
+      task.setEnabled(true);
+    }
 
     return task;
   }
 
   @Override
-  protected boolean hasBuildTask(Collection<? extends BeforeRunTask> beforeRunTasks) {
+  protected boolean hasBuildTaskForModule(
+      Collection<? extends BeforeRunTask> beforeRunTasks, final Module module) {
     return !Collections2.filter(beforeRunTasks, new Predicate<BeforeRunTask>() {
       @Override
       public boolean apply(@Nullable BeforeRunTask beforeRunTask) {
         return beforeRunTask != null
             && beforeRunTask instanceof MavenBeforeRunTask
-            && MAVEN_TASK_INSTALL.equals(((MavenBeforeRunTask) beforeRunTask).getGoal());
+            && MAVEN_TASK_INSTALL.equals(((MavenBeforeRunTask) beforeRunTask).getGoal())
+            && ((MavenBeforeRunTask) beforeRunTask).getProjectPath()
+            .equals(getMavenModulePath(module));
       }
     }).isEmpty();
   }
 
+  @Nullable
+  private String getMavenModulePath(Module module) {
+    MavenProject mavenProject =
+        MavenProjectsManager.getInstance(module.getProject()).findProject(module);
+
+    if(mavenProject == null) {
+      return null;
+    }
+
+    return mavenProject.getFile().getPath();
+  }
 }
 

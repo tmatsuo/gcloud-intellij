@@ -57,12 +57,12 @@ public abstract class BuildDeploymentSourceType extends ModuleDeploymentSourceTy
     RunManagerEx runManager = RunManagerEx.getInstanceEx(configuration.getProject());
     final List<? extends BeforeRunTask> buildTasks = getBuildTasks(runManager, configuration);
 
-    if (hasBuildTask(buildTasks)) {
+    if (hasBuildTaskForModule(buildTasks, module)) {
       for (BeforeRunTask task : buildTasks) {
         task.setEnabled(true);
       }
     } else {
-      BeforeRunTask buildTask = createBuildTask(configuration.getProject(), module);
+      BeforeRunTask buildTask = createBuildTask(module);
       List<BeforeRunTask> tasks = runManager.getBeforeRunTasks(configuration);
       tasks.add(buildTask);
       runManager.setBeforeRunTasks(configuration, tasks, true);
@@ -84,11 +84,11 @@ public abstract class BuildDeploymentSourceType extends ModuleDeploymentSourceTy
     Module module = source.getModule();
 
     if(module != null && editor != null) {
-      BeforeRunTask buildTask = createBuildTask(project, module);
+      BeforeRunTask buildTask = createBuildTask(module);
 
       if(buildTask != null) {
         List<BeforeRunTask> beforeRunTasks = editor.getStepsBeforeLaunch();
-        if (select && !hasBuildTask(beforeRunTasks)) {
+        if (select && !hasBuildTaskForModule(beforeRunTasks, module)) {
           editor.addBeforeLaunchStep(buildTask);
         }
       }
@@ -101,9 +101,10 @@ public abstract class BuildDeploymentSourceType extends ModuleDeploymentSourceTy
       RunConfiguration configuration);
 
   @Nullable
-  protected abstract BeforeRunTask createBuildTask(Project project, Module module);
+  protected abstract BeforeRunTask createBuildTask(Module module);
 
-  protected abstract boolean hasBuildTask(Collection<? extends BeforeRunTask> beforeRunTasks);
+  protected abstract boolean hasBuildTaskForModule(
+      Collection<? extends BeforeRunTask> beforeRunTasks, Module module);
 
   /**
    * Manually set the deployment configuration so that its available immediately in the
