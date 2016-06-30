@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .idea/workspace.xml
 .idea/modules.xml
 .idea/misc.xml
@@ -12,11 +11,3 @@
 **/*.iml
 .gradle/
 **/build/
-=======
-/.idea/
-/out/
-/classes/
-/gradle/
-/gradlew*
-/.gradle/
->>>>>>> d41dc2d2be074f08333b284e39fe91aef3cbc381
