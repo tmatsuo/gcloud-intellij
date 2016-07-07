@@ -31,11 +31,24 @@ intellij {
 
 project.afterEvaluate {
     prepareSandbox.dependsOn ':google-account-plugin:prepareSandbox'
+
+    //todo: currently we need this to include 'ultimate' module to the plugin zip; it would be better to support such inclusion in 'intellij' plugin
+    def task = project.tasks.findByName("prepareSandbox")
+    task.dependsOn project('ultimate').jar
+    task.doLast {
+        copy {
+            from files(project('ultimate').jar)
+            into "$task.destinationDir/lib"
+        }
+    }
 }
 
 dependencies {
     compile(project(':google-account-plugin'))
     compile(project(':common-lib'))
+
+    compile project('jps-plugin')
+    compile project('runtime')
 
     compile 'com.google.apis:google-api-services-clouddebugger:v2-rev7-1.21.0'
     compile 'com.google.apis:google-api-services-cloudresourcemanager:v1beta1-rev12-1.21.0'
