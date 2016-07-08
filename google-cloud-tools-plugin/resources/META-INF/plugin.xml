@@ -72,7 +72,11 @@ Code inspections for App Engine Java code.</description>
                         serviceImplementation="com.google.cloud.tools.intellij.appengine.sdk.impl.AppEngineSdkManagerImpl"/>
     <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.facet.AppEngineWebIntegration"
                         serviceImplementation="com.google.cloud.tools.intellij.appengine.facet.impl.AppEngineCommunityWebIntegration"/>
+    <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.project.AppEngineProjectService"
+                        serviceImplementation="com.google.cloud.tools.intellij.appengine.project.DefaultAppEngineProjectService"/>
+    <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.project.AppEngineAssetProvider"
 
+                        serviceImplementation="com.google.cloud.tools.intellij.appengine.project.DefaultAppEngineAssetProvider"/>
     <framework.type implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineFrameworkType"/>
     <fileTemplateGroup implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineTemplateGroupDescriptorFactory"/>
     <facetType implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineFacetType"/>
@@ -82,7 +86,6 @@ Code inspections for App Engine Java code.</description>
     <localInspection language="JAVA" shortName="AppEngineForbiddenCode" displayName="Forbidden code in App Engine applications"
                      groupName="Google App Engine" enabledByDefault="true" level="ERROR"
                      implementationClass="com.google.cloud.tools.intellij.appengine.inspections.AppEngineForbiddenCodeInspection"/>
-
 
     <localInspection language="JAVA" shortName="ApiName" bundle="messages.EndpointBundle"  hasStaticDescription="true"
                      key="api.name.name" groupKey="inspections.group.name" enabledByDefault="true" level="ERROR"
