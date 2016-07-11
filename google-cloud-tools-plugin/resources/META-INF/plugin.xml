@@ -72,6 +72,7 @@ Code inspections for App Engine Java code.</description>
                         serviceImplementation="com.google.cloud.tools.intellij.appengine.sdk.impl.AppEngineSdkManagerImpl"/>
     <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.facet.AppEngineWebIntegration"
                         serviceImplementation="com.google.cloud.tools.intellij.appengine.facet.impl.AppEngineCommunityWebIntegration"/>
+
     <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.project.AppEngineProjectService"
                         serviceImplementation="com.google.cloud.tools.intellij.appengine.project.DefaultAppEngineProjectService"/>
     <applicationService serviceInterface="com.google.cloud.tools.intellij.appengine.project.AppEngineAssetProvider"
@@ -81,6 +82,7 @@ Code inspections for App Engine Java code.</description>
     <fileTemplateGroup implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineTemplateGroupDescriptorFactory"/>
     <facetType implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineFacetType"/>
     <project.converterProvider implementation="com.google.cloud.tools.intellij.appengine.converter.AppEngineFacetConverterProvider"/>
+    <framework.detector implementation="com.google.cloud.tools.intellij.appengine.facet.AppEngineFrameworkDetector"/>
     <compileServer.plugin classpath="google-app-engine-jps-plugin.jar;appEngine-runtime.jar"/>
 
     <localInspection language="JAVA" shortName="AppEngineForbiddenCode" displayName="Forbidden code in App Engine applications"
